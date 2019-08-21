@@ -1,0 +1,293 @@
+CREATE TABLE table_matches 
+( 
+ id      NUMBER(10)    NOT NULL, 
+ team1 VARCHAR2(100), 
+ team2 VARCHAR2(100), 
+ score1 VARCHAR2(100), 
+ score2 VARCHAR2(100), 
+ match_result VARCHAR2(100),
+ home_team VARCHAR2(100),
+ CONSTRAINT matches_pk PRIMARY KEY (id)  
+);
+/
+
+
+CREATE SEQUENCE matches_sequence START WITH 1 INCREMENT BY 1;
+/
+
+CREATE OR REPLACE TRIGGER match_on_insert 
+  BEFORE INSERT ON table_matches 
+  FOR EACH ROW 
+BEGIN 
+  SELECT matches_sequence.nextval 
+  INTO :new.id 
+  FROM dual; 
+END;
+/
+
+CREATE OR REPLACE PROCEDURE proc_matchresult AS
+    CURSOR cur_matches IS select * from table_matches;
+    l_run1 NUMBER(20);
+    l_run2 NUMBER(20);
+    l_wicket NUMBER(20);
+BEGIN
+    FOR matches IN cur_matches
+    LOOP
+        IF matches.id=12 THEN
+            EXECUTE IMMEDIATE 'UPDATE table_matches SET match_result=Rajasthan Royals won by 10 runs (DLS method)';
+        ELSIF matches.id=36 THEN
+            EXECUTE IMMEDIATE 'UPDATE table_matches SET match_result=Kings XI Punjab won by 9 wickets (DLS method)';
+        ELSIF matches.id=64 THEN
+            EXECUTE IMMEDIATE 'UPDATE table_matches SET match_result=Delhi Daredevils won by 4 runs (DLS method)';
+        ELSE
+            l_run1 := TO_NUMBER(REGEXP_SUBSTR(matches.score1,'[^/ ]+',1,1));
+            l_run2 := TO_NUMBER(REGEXP_SUBSTR(matches.score2,'[^/ ]+',1,1));
+            IF INSTR(matches.score2,'/') != 0 THEN
+                l_wicket := TO_NUMBER(REGEXP_SUBSTR(matches.score2,'[^/ ]+',1,2));
+            ELSE
+                l_wicket := 10;
+            END IF;
+            IF l_run1>l_run2 THEN
+                EXECUTE IMMEDIATE 'UPDATE table_matches SET match_result='||''''||matches.team1||' won by '||TO_CHAR(l_run1-l_run2)||' runs'' WHERE id='||matches.id;
+            ELSE
+                EXECUTE IMMEDIATE 'UPDATE table_matches SET match_result='||''''||matches.team2||' won by '||TO_CHAR(10-l_wicket)||' wickets'' WHERE id='||matches.id;
+            END IF;
+        END IF;
+    END LOOP;
+END;
+/
+
+
+create table table_linearprogression
+(
+ team_name varchar2(50), 
+ "1" integer DEFAULT NULL, 
+ "2" integer DEFAULT NULL, 
+ "3" integer DEFAULT NULL,   
+ "4" integer DEFAULT NULL, 
+ "5" integer DEFAULT NULL, 
+ "6" integer DEFAULT NULL, 
+ "7" integer DEFAULT NULL, 
+ "8" integer DEFAULT NULL,   
+ "9" integer DEFAULT NULL, 
+ "10" integer DEFAULT NULL, 
+ "11" integer DEFAULT NULL, 
+ "12" integer DEFAULT NULL, 
+ "13" integer DEFAULT NULL,   
+"14" integer DEFAULT NULL
+);
+/
+
+CREATE TABLE table_matchsummary 
+( 
+ team_name VARCHAR2(100), 
+ CSK VARCHAR2(100)  DEFAULT NULL,
+ DD VARCHAR2(100)  DEFAULT NULL,
+ KXIP VARCHAR2(100)  DEFAULT NULL,
+ KKR VARCHAR2(100)  DEFAULT NULL,
+ MI VARCHAR2(100)  DEFAULT NULL,
+ RR VARCHAR2(100)  DEFAULT NULL,
+ RCB VARCHAR2(100)  DEFAULT NULL,
+ SRH VARCHAR2(100)  DEFAULT NULL
+);
+/
+
+create table table_league
+(
+ team_name varchar2(50), 
+ Pld integer DEFAULT NULL, 
+ W integer DEFAULT NULL,   
+ L integer DEFAULT NULL, 
+ T integer DEFAULT 0, 
+ NR integer DEFAULT 0, 
+ Pts integer DEFAULT NULL, 
+ NRR float DEFAULT 0
+);
+/
+
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Mumbai Indians','Chennai Super Kings','165/4 (20 overs)','169/9 (19.5 overs)','Chennai Super Kings won by 1 wicket','Mumbai Indians');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Delhi Daredevils','Kings XI Punjab','166/7 (20 overs)','167/4 (18.5 overs)','Kings XI Punjab won by 6 wickets','Kings XI Punjab');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Royal Challengers Bangalore','Kolkata Knight Riders','176/7 (20 overs)','177/6 (18.5 overs)','Kolkata Knight Riders won by 4 wickets','Kolkata Knight Riders');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Rajasthan Royals','Sunrisers Hyderabad','125/9 (20 overs)','127/1 (15.5 overs)','Sunrisers Hyderabad won by 9 wickets','Sunrisers Hyderabad');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Kolkata Knight Riders','Chennai Super Kings','202/6 (20 overs)','205/5 (19.5 overs)','Chennai Super Kings won by 5 wickets','Chennai Super Kings');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Rajasthan Royals','Delhi Daredevils','153/5 (17.5 overs)','60/4 (6 overs)','Rajasthan Royals won by 10 runs (DLS method)','Rajasthan Royals');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Mumbai Indians','Sunrisers Hyderabad','147/8 (20 overs)','151/9 (20 overs)','Sunrisers Hyderabad won by 1 wicket','Sunrisers Hyderabad');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Kings XI Punjab','Royal Challengers Bangalore','155 (19.2 overs)','159/6 (19.3 overs)','Royal Challengers Bangalore won by 4 wickets','Royal Challengers Bangalore');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Mumbai Indians','Delhi Daredevils','194/7 (20 overs)','195/3 (20 overs)','Delhi Daredevils won by 7 wickets','Mumbai Indians');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Kolkata Knight Riders','Sunrisers Hyderabad','138/8 (20 overs)','139/5 (19 overs)','Sunrisers Hyderabad won by 5 wickets','Kolkata Knight Riders');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Rajasthan Royals','Royal Challengers Bangalore','217/4 (20 overs)','198/6 (20 overs)','Rajasthan Royals won by 19 runs','Royal Challengers Bangalore');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Kings XI Punjab','Chennai Super Kings','197/7 (20 overs)','193/5 (20 overs)','Kings XI Punjab won by 4 runs','Kings XI Punjab');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Kolkata Knight Riders','Delhi Daredevils','200/9 (20 overs)','129 (14.2 overs)','Kolkata Knight Riders won by 71 runs','Kolkata Knight Riders');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Mumbai Indians','Royal Challengers Bangalore','213/6 (20 overs)','167/8 (20 overs)','Mumbai Indians won by 46 runs','Mumbai Indians');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Rajasthan Royals','Kolkata Knight Riders','160/8 (20 overs)','163/3 (18.5 overs)','Kolkata Knight Riders won by 7 wickets','Rajasthan Royals');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Kings XI Punjab','Sunrisers Hyderabad','193/3 (20 overs)','178/4 (20 overs)','Kings XI Punjab won by 15 runs','Kings XI Punjab');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Chennai Super Kings','Rajasthan Royals','204/5 (20 overs)','140 (18.3 overs)','Chennai Super Kings won by 64 runs','Chennai Super Kings');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Kolkata Knight Riders','Kings XI Punjab','191/7 (20 overs)','126/1 (11.1 overs)','Kings XI Punjab won by 9 wickets (DLS method)','Kolkata Knight Riders');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Delhi Daredevils','Royal Challengers Bangalore','174/5 (20 overs)','176/4 (18 overs)','Royal Challengers Bangalore won by 6 wickets','Royal Challengers Bangalore');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Chennai Super Kings','Sunrisers Hyderabad','182/3 (20 overs)','178/6 (20 overs)','Chennai Super Kings won by 4 runs','Sunrisers Hyderabad');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Mumbai Indians','Rajasthan Royals','167/7 (20 overs)','168/7 (19.4 overs)','Rajasthan Royals won by 3 wickets','Rajasthan Royals');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Kings XI Punjab','Delhi Daredevils','143/8 (20 overs)','139/8 (20 overs)','Kings XI Punjab won by 4 runs','Delhi Daredevils');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Sunrisers Hyderabad','Mumbai Indians','118 (18.4 overs)','87 (18.5 overs)','Sunrisers Hyderabad won by 31 runs','Mumbai Indians');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Royal Challengers Bangalore','Chennai Super Kings','205/8 (20 overs)','207/5 (19.4 overs)','Chennai Super Kings won by 5 wickets','Royal Challengers Bangalore');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Sunrisers Hyderabad','Kings XI Punjab','132/6 (20 overs)','119 (19.2 overs)','Sunrisers Hyderabad won by 13 runs','Sunrisers Hyderabad');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Delhi Daredevils','Kolkata Knight Riders','219/4 (20 overs)','164/9 (20 overs)','Delhi Daredevils won by 55 runs','Delhi Daredevils');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Chennai Super Kings','Mumbai Indians','169/5 (20 overs)','170/2 (19.4 overs)','Mumbai Indians won by 8 wickets','Chennai Super Kings');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Sunrisers Hyderabad','Rajasthan Royals','151/7 (20 overs)','140/6 (20 overs)','Sunrisers Hyderabad won by 11 runs','Rajasthan Royals');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Royal Challengers Bangalore','Kolkata Knight Riders','175/4 (20 overs)','176/4 (19.1 overs)','Kolkata Knight Riders won by 6 wickets','Royal Challengers Bangalore');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Chennai Super Kings','Delhi Daredevils','211/4 (20 overs)','198/5 (20 overs)','Chennai Super Kings won by 13 runs','Chennai Super Kings');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Royal Challengers Bangalore','Mumbai Indians','167/7 (20 overs)','153/7 (20 overs)','Royal Challengers Bangalore won by 14 runs','Royal Challengers Bangalore');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Delhi Daredevils','Rajasthan Royals','196/6 (17.1 overs)','146/5 (12 overs)','Delhi Daredevils won by 4 runs (DLS method)','Delhi Daredevils');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Chennai Super Kings','Kolkata Knight Riders','177/5 (20 overs)','180/4 (17.4 overs)','Kolkata Knight Riders won by 6 wickets','Kolkata Knight Riders');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Kings XI Punjab','Mumbai Indians','174/6 (20 overs)','176/4 (19 overs)','Mumbai Indians won by 6 wickets','Kings XI Punjab');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Royal Challengers Bangalore','Chennai Super Kings','127/9 (20 overs)','128/4 (18 overs)','Chennai Super Kings won by 6 wickets','Chennai Super Kings');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Delhi Daredevils','Sunrisers Hyderabad','163/5 (20 overs)','164/3 (19.5 overs)','Sunrisers Hyderabad won by 7 wickets','Sunrisers Hyderabad');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Mumbai Indians','Kolkata Knight Riders','181/4 (20 overs)','168/6 (20 overs)','Mumbai Indians won by 13 runs','Mumbai Indians');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Rajasthan Royals','Kings XI Punjab','152/9 (20 overs)','155/4 (18.4 overs)','Kings XI Punjab won by 6 wickets','Kings XI Punjab');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Sunrisers Hyderabad','Royal Challengers Bangalore','146 (20 overs)','141/6 (20 overs)','Sunrisers Hyderabad won by 5 runs','Sunrisers Hyderabad');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Rajasthan Royals','Kings XI Punjab','158/8 (20 overs)','143/7 (20 overs)','Rajasthan Royals won by 15 runs','Rajasthan Royals');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Mumbai Indians','Kolkata Knight Riders','210/6 (20 overs)','108 (18.1 overs)','Mumbai Indians won by 102 runs','Kolkata Knight Riders');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Delhi Daredevils','Sunrisers Hyderabad','187/5 (20 overs)','191/1 (18.5 overs)','Sunrisers Hyderabad won by 9 wickets','Delhi Daredevils');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Chennai Super Kings','Rajasthan Royals','176/4 (20 overs)','177/6 (19.5 overs)','Rajasthan Royals won by 4 wickets','Rajasthan Royals');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Kolkata Knight Riders','Kings XI Punjab','245/6 (20 overs)','214/8 (20 overs)','Kolkata Knight Riders won by 31 runs','Kings XI Punjab');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Delhi Daredevils','Royal Challengers Bangalore','181/4 (20 overs)','187/5 (19 overs)','Royal Challengers Bangalore won by 5 wickets','Delhi Daredevils');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Sunrisers Hyderabad','Chennai Super Kings','179/4 (20 overs)','180/2 (19 overs)','Chennai Super Kings won by 8 wickets','Chennai Super Kings');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Mumbai Indians','Rajasthan Royals','168/6 (20 overs)','171/3 (18 overs)','Rajasthan Royals won by 7 wickets','Mumbai Indians');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Kings XI Punjab','Royal Challengers Bangalore','88 (15.1 overs)','92/0 (8.1 overs)','Royal Challengers Bangalore won by 10 wickets','Kings XI Punjab');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Rajasthan Royals','Kolkata Knight Riders','142 (19 overs)','145/4 (18 overs)','Kolkata Knight Riders won by 6 wickets','Kolkata Knight Riders');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Mumbai Indians','Kings XI Punjab','186/8 (20 overs)','183/5 (20 overs)','Mumbai Indians won by 3 runs','Mumbai Indians');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Royal Challengers Bangalore','Sunrisers Hyderabad','218/6 (20 overs)','204/3 (20 overs)','Royal Challengers Bangalore won by 14 runs','Royal Challengers Bangalore');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Delhi Daredevils','Chennai Super Kings','162/5 (20 overs)','128/6 (20 overs)','Delhi Daredevils won by 34 runs','Delhi Daredevils');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Rajasthan Royals','Royal Challengers Bangalore','164/5 (20 overs)','134 (19.2 overs)','Rajasthan Royals won by 30 runs','Rajasthan Royals');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Sunrisers Hyderabad','Kolkata Knight Riders','172/9 (20 overs)','173/5 (19.4 overs)','Kolkata Knight Riders won by 5 wickets','Sunrisers Hyderabad');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Delhi Daredevils','Mumbai Indians','174/4 (20 overs)','163 (19.3 overs)','Delhi Daredevils won by 11 runs','Delhi Daredevils');
+INSERT INTO table_matches VALUES(matches_sequence.nextval,'Kings XI Punjab','Chennai Super Kings','153 (19.4 overs)','159/5 (19.1 overs)','Chennai Super Kings won by 5 wickets','Chennai Super Kings');
+/
+
+
+
+CREATE PACKAGE teams AS 
+    TYPE assoc_array_type IS TABLE OF VARCHAR2(100) INDEX BY VARCHAR2(100);
+    g_const_array assoc_array_type; 
+END teams; 
+/
+
+CREATE OR REPLACE PACKAGE BODY teams IS
+BEGIN
+   g_const_array('Chennai Super Kings') := 'CSK';
+   g_const_array('Delhi Daredevils') := 'DD';
+   g_const_array('Kings XI Punjab') := 'KXIP';
+   g_const_array('Kolkata Knight Riders') := 'KKR';
+   g_const_array('Mumbai Indians') := 'MI';
+   g_const_array('Rajasthan Royals') := 'RR';
+   g_const_array('Royal Challengers Bangalore') := 'RCB';
+   g_const_array('Sunrisers Hyderabad') := 'SRH';
+   g_const_array('CSK') := 0;
+   g_const_array('DD') := 0;
+   g_const_array('KXIP') := 0;
+   g_const_array('KKR') := 0;
+   g_const_array('MI') := 0;
+   g_const_array('RR') := 0;
+   g_const_array('RCB') := 0;
+   g_const_array('SRH') := 0;
+END teams;
+/
+
+INSERT INTO table_linearprogression(team_name) VALUES('Chennai Super Kings');
+INSERT INTO table_linearprogression(team_name) VALUES('Delhi Daredevils');
+INSERT INTO table_linearprogression(team_name) VALUES('Kings XI Punjab');
+INSERT INTO table_linearprogression(team_name) VALUES('Kolkata Knight Riders');
+INSERT INTO table_linearprogression(team_name) VALUES('Mumbai Indians');
+INSERT INTO table_linearprogression(team_name) VALUES('Rajasthan Royals');
+INSERT INTO table_linearprogression(team_name) VALUES('Royal Challengers Bangalore');
+INSERT INTO table_linearprogression(team_name) VALUES('Sunrisers Hyderabad');
+/
+
+INSERT INTO table_matchsummary(team_name) VALUES('Chennai Super Kings');
+INSERT INTO table_matchsummary(team_name) VALUES('Delhi Daredevils');
+INSERT INTO table_matchsummary(team_name) VALUES('Kings XI Punjab');
+INSERT INTO table_matchsummary(team_name) VALUES('Kolkata Knight Riders');
+INSERT INTO table_matchsummary(team_name) VALUES('Mumbai Indians');
+INSERT INTO table_matchsummary(team_name) VALUES('Rajasthan Royals');
+INSERT INTO table_matchsummary(team_name) VALUES('Royal Challengers Bangalore');
+INSERT INTO table_matchsummary(team_name) VALUES('Sunrisers Hyderabad');
+/
+
+INSERT INTO table_league(team_name) VALUES('Chennai Super Kings');
+INSERT INTO table_league(team_name) VALUES('Delhi Daredevils');
+INSERT INTO table_league(team_name) VALUES('Kings XI Punjab');
+INSERT INTO table_league(team_name) VALUES('Kolkata Knight Riders');
+INSERT INTO table_league(team_name) VALUES('Mumbai Indians');
+INSERT INTO table_league(team_name) VALUES('Rajasthan Royals');
+INSERT INTO table_league(team_name) VALUES('Royal Challengers Bangalore');
+INSERT INTO table_league(team_name) VALUES('Sunrisers Hyderabad');
+/
+
+CREATE OR REPLACE TRIGGER match_on_insert2 
+BEFORE INSERT ON table_matches 
+FOR EACH ROW
+DECLARE
+     l_winner varchar2(100);
+     l_temp varchar2(100);
+     l_pt1 number(20);
+     l_pt2 number(20);
+     
+BEGIN 
+    l_winner:= REGEXP_SUBSTR(:new.match_result, '(.*?)( won|$)',1,1, NULL, 1);
+    
+    --*********************table_linearprogression*****************************
+    teams.g_const_array(teams.g_const_array(:new.team1)):=teams.g_const_array(teams.g_const_array(:new.team1))+1;
+    teams.g_const_array(teams.g_const_array(:new.team2)):=teams.g_const_array(teams.g_const_array(:new.team2))+1;
+    
+    --for team1
+    IF teams.g_const_array(teams.g_const_array(:new.team1)) = 1 THEN
+        IF :new.team1 = l_winner THEN
+            l_pt1 := 2;
+        ELSE
+            l_pt1 := 0;
+        END IF;
+    ELSE
+        EXECUTE IMMEDIATE 'SELECT "'||TO_CHAR(teams.g_const_array(teams.g_const_array(:new.team1))-1)||'" FROM table_linearprogression WHERE team_name='''||:new.team1||'''' INTO l_pt1;
+        IF :new.team1 = l_winner THEN
+            l_pt1 := l_pt1 + 2;
+        END IF;
+    END IF;
+    EXECUTE IMMEDIATE 'UPDATE table_linearprogression set "'||teams.g_const_array(teams.g_const_array(:new.team1))||'"='''||l_pt1||''' WHERE team_name ='''||:new.team1||'''';
+
+    --for team 2
+    IF teams.g_const_array(teams.g_const_array(:new.team2)) = 1 THEN
+        IF :new.team2 = l_winner THEN
+            l_pt2 := 2;
+        ELSE
+            l_pt2 := 0;
+        END IF;
+    ELSE
+        EXECUTE IMMEDIATE 'SELECT "'||TO_CHAR(teams.g_const_array(teams.g_const_array(:new.team2))-1)||'" FROM table_linearprogression WHERE team_name='''||:new.team2||'''' INTO l_pt2;
+        IF :new.team2 = l_winner THEN
+            l_pt2 := l_pt2 + 2;
+
+        END IF;
+    END IF;
+    EXECUTE IMMEDIATE 'UPDATE table_linearprogression set "'||teams.g_const_array(teams.g_const_array(:new.team2))||'"='''||l_pt2||''' WHERE team_name ='''||:new.team2||''''; 
+    
+    
+    
+    --*********************table_matchsummary****************************
+    IF :new.team1 = :new.home_team THEN
+        l_temp := :new.team2;
+    ELSE
+        l_temp := :new.team1;
+    END IF;
+    
+    EXECUTE IMMEDIATE 'UPDATE table_matchsummary set '||teams.g_const_array(l_temp)||'='''||teams.g_const_array(l_winner)||''' WHERE team_name ='''||:new.home_team||'''';
+
+END;
+/
+
+
+
+
+
+
+
+
+

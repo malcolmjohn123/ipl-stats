@@ -1,0 +1,54 @@
+CREATE OR REPLACE TRIGGER match_on_insert2 
+BEFORE INSERT ON table_matches 
+FOR EACH ROW
+DECLARE
+    run1 NUMBER(20);
+    run2 NUMBER(20);
+    over1 FLOAT(20);
+    over2 FLOAT(20);
+    temp VARCHAR2(100);
+    temp_nrr VARCHAR2(100);
+    NRR1 FLOAT(20);
+    NRR2 FLOAT(20);
+     
+BEGIN
+    --For team 1
+    IF INSTR(:new.score1,'/') = 0 THEN
+        over1 := 20;
+    ELSE
+      temp := REGEXP_SUBSTR(:new.score1,'[^( ]+',1,2);
+      IF INSTR(temp, '.') = 0 THEN
+        over1 := TO_NUMBER(temp);
+      ELSE
+        over1 := ((TO_NUMBER(REGEXP_SUBSTR(temp,'[^.]+',1,2)))/6) + TO_NUMBER(REGEXP_SUBSTR(temp,'[^.]+',1,1)); 
+      END IF;
+    END IF;
+    run1 := TO_NUMBER(REGEXP_SUBSTR(:new.score1,'[^/ ]+',1,1));
+    
+    --For team 2
+    IF INSTR(:new.score2,'/') = 0 THEN
+        over2 := 20;
+    ELSE
+      temp := REGEXP_SUBSTR(:new.score2,'[^( ]+',1,2);
+      IF INSTR(temp, '.')=0 THEN
+        over2 := TO_NUMBER(temp);
+      ELSE
+        over2 := ((TO_NUMBER(REGEXP_SUBSTR(temp,'[^.]+',1,2)))/6) + TO_NUMBER(REGEXP_SUBSTR(temp,'[^.]+',1,1)); 
+      END IF;
+    END IF;
+    run2 := TO_NUMBER(REGEXP_SUBSTR(:new.score2,'[^/ ]+',1,1));
+    
+    NRR1 := (run1/over1) - (run2/over2);
+    NRR2 := -NRR1;
+    
+    EXECUTE IMMEDIATE 'SELECT NRR FROM table_league WHERE team_name='''||:new.team1||'''' INTO temp_nrr;
+    NRR1 := NRR1 + TO_NUMBER(temp_NRR);
+    EXECUTE IMMEDIATE 'UPDATE table_league SET NRR='||NRR1||' WHERE team_name ='''||:new.team1||'''';
+    EXECUTE IMMEDIATE 'SELECT NRR FROM table_league WHERE team_name='''||:new.team2||'''' INTO temp_nrr;
+    NRR1 := NRR2 + TO_NUMBER(temp_NRR);
+    EXECUTE IMMEDIATE 'UPDATE table_league SET NRR='||NRR2||' WHERE team_name ='''||:new.team2||'''';
+    
+END;
+/
+
+

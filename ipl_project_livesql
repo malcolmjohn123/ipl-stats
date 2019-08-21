@@ -1,0 +1,743 @@
+CREATE TABLE table_teams
+(
+ id varchar2(20),
+ team_name varchar2(30),
+ PRIMARY KEY (id)
+);
+/
+
+
+CREATE TABLE table_matches
+(
+ id      NUMBER(10)    NOT NULL,
+ team1 VARCHAR2(100),
+ team2 VARCHAR2(100),
+ score1 VARCHAR2(100),
+ score2 VARCHAR2(100),
+ match_result VARCHAR2(100),
+ home_team VARCHAR2(100),
+ match_type VARCHAR2(10),
+ PRIMARY KEY (id)
+);
+/
+
+CREATE SEQUENCE matches_sequence1 START WITH 1 INCREMENT BY 1;
+/
+
+CREATE OR REPLACE TRIGGER match_on_insert
+  BEFORE INSERT ON table_matches
+  FOR EACH ROW
+BEGIN
+  SELECT matches_sequence1.nextval
+  INTO :new.id
+  FROM dual;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE proc_matchresult AS
+    CURSOR cur_matches IS select * from table_matches;
+    l_run1 NUMBER(20);
+    l_run2 NUMBER(20);
+    l_team1 VARCHAR2(50);
+    l_team2 VARCHAR2(50);
+    l_wicket NUMBER(20);
+BEGIN
+    FOR matches IN cur_matches
+    LOOP
+        IF matches.id=12 THEN
+            EXECUTE IMMEDIATE 'UPDATE table_matches SET match_result=''Rajasthan Royals won by 10 runs (DLS method)'''||' WHERE id='||matches.id;
+        ELSIF matches.id=36 THEN
+            EXECUTE IMMEDIATE 'UPDATE table_matches SET match_result=''Kings XI Punjab won by 9 wickets (DLS method)'''||' WHERE id='||matches.id;
+        ELSIF matches.id=64 THEN
+            EXECUTE IMMEDIATE 'UPDATE table_matches SET match_result=''Delhi Daredevils won by 4 runs (DLS method)'''||' WHERE id='||matches.id;
+        ELSE
+            EXECUTE IMMEDIATE 'SELECT team_name FROM table_teams WHERE id='''||matches.team1||'''' INTO l_team1;
+            EXECUTE IMMEDIATE 'SELECT team_name FROM table_teams WHERE id='''||matches.team2||'''' INTO l_team2;
+            l_run1 := TO_NUMBER(REGEXP_SUBSTR(matches.score1,'[^/ ]+',1,1));
+            l_run2 := TO_NUMBER(REGEXP_SUBSTR(matches.score2,'[^/ ]+',1,1));
+            IF INSTR(matches.score2,'/') != 0 THEN
+                l_wicket := TO_NUMBER(REGEXP_SUBSTR(matches.score2,'[^/ ]+',1,2));
+            ELSE
+                l_wicket := 10;
+            END IF;
+            IF l_run1>l_run2 THEN
+                EXECUTE IMMEDIATE 'UPDATE table_matches SET match_result='||''''||l_team1||' won by '||TO_CHAR(l_run1-l_run2)||' runs'' WHERE id='||matches.id;
+            ELSE
+                EXECUTE IMMEDIATE 'UPDATE table_matches SET match_result='||''''||l_team2||' won by '||TO_CHAR(10-l_wicket)||' wickets'' WHERE id='||matches.id;
+            END IF;
+        END IF;
+    END LOOP;
+END;
+/
+
+INSERT INTO table_teams(id,team_name) VALUES('CSK','Chennai Super Kings');
+INSERT INTO table_teams(id,team_name) VALUES('DD','Delhi Daredevils');
+INSERT INTO table_teams(id,team_name) VALUES('KXIP','Kings XI Punjab');
+INSERT INTO table_teams(id,team_name) VALUES('KKR','Kolkata Knight Riders');
+INSERT INTO table_teams(id,team_name) VALUES('MI','Mumbai Indians');
+INSERT INTO table_teams(id,team_name) VALUES('RR','Rajasthan Royals');
+INSERT INTO table_teams(id,team_name) VALUES('RCB','Royal Challengers Bangalore');
+INSERT INTO table_teams(id,team_name) VALUES('SRH','Sunrisers Hyderabad');
+/
+
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'MI','CSK','165/4 (20 overs)','169/9 (19.5 overs)',NULL,'MI','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'DD','KXIP','166/7 (20 overs)','167/4 (18.5 overs)',NULL,'KXIP','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'RCB','KKR','176/7 (20 overs)','177/6 (18.5 overs)',NULL,'KKR','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'RR','SRH','125/9 (20 overs)','127/1 (15.5 overs)',NULL,'SRH','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'KKR','CSK','202/6 (20 overs)','205/5 (19.5 overs)',NULL,'CSK','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'RR','DD','153/5 (17.5 overs)','60/4 (6 overs)',NULL,'RR','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'MI','SRH','147/8 (20 overs)','151/9 (20 overs)',NULL,'SRH','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'KXIP','RCB','155 (19.2 overs)','159/6 (19.3 overs)',NULL,'RCB','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'MI','DD','194/7 (20 overs)','195/3 (20 overs)',NULL,'MI','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'KKR','SRH','138/8 (20 overs)','139/5 (19 overs)',NULL,'KKR','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'RR','RCB','217/4 (20 overs)','198/6 (20 overs)',NULL,'RCB','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'KXIP','CSK','197/7 (20 overs)','193/5 (20 overs)',NULL,'KXIP','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'KKR','DD','200/9 (20 overs)','129 (14.2 overs)',NULL,'KKR','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'MI','RCB','213/6 (20 overs)','167/8 (20 overs)',NULL,'MI','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'RR','KKR','160/8 (20 overs)','163/3 (18.5 overs)',NULL,'RR','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'KXIP','SRH','193/3 (20 overs)','178/4 (20 overs)',NULL,'KXIP','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'CSK','RR','204/5 (20 overs)','140 (18.3 overs)',NULL,'CSK','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'KKR','KXIP','191/7 (20 overs)','126/1 (11.1 overs)',NULL,'KKR','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'DD','RCB','174/5 (20 overs)','176/4 (18 overs)',NULL,'RCB','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'CSK','SRH','182/3 (20 overs)','178/6 (20 overs)',NULL,'SRH','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'MI','RR','167/7 (20 overs)','168/7 (19.4 overs)',NULL,'RR','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'KXIP','DD','143/8 (20 overs)','139/8 (20 overs)',NULL,'DD','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'SRH','MI','118 (18.4 overs)','87 (18.5 overs)',NULL,'MI','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'RCB','CSK','205/8 (20 overs)','207/5 (19.4 overs)',NULL,'RCB','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'SRH','KXIP','132/6 (20 overs)','119 (19.2 overs)',NULL,'SRH','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'DD','KKR','219/4 (20 overs)','164/9 (20 overs)',NULL,'DD','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'CSK','MI','169/5 (20 overs)','170/2 (19.4 overs)',NULL,'CSK','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'SRH','RR','151/7 (20 overs)','140/6 (20 overs)',NULL,'RR','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'RCB','KKR','175/4 (20 overs)','176/4 (19.1 overs)',NULL,'RCB','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'CSK','DD','211/4 (20 overs)','198/5 (20 overs)',NULL,'CSK','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'RCB','MI','167/7 (20 overs)','153/7 (20 overs)',NULL,'RCB','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'DD','RR','196/6 (17.1 overs)','146/5 (12 overs)',NULL,'DD','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'CSK','KKR','177/5 (20 overs)','180/4 (17.4 overs)',NULL,'KKR','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'KXIP','MI','174/6 (20 overs)','176/4 (19 overs)',NULL,'KXIP','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'RCB','CSK','127/9 (20 overs)','128/4 (18 overs)',NULL,'CSK','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'DD','SRH','163/5 (20 overs)','164/3 (19.5 overs)',NULL,'SRH','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'MI','KKR','181/4 (20 overs)','168/6 (20 overs)',NULL,'MI','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'RR','KXIP','152/9 (20 overs)','155/4 (18.4 overs)',NULL,'KXIP','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'SRH','RCB','146 (20 overs)','141/6 (20 overs)',NULL,'SRH','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'RR','KXIP','158/8 (20 overs)','143/7 (20 overs)',NULL,'RR','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'MI','KKR','210/6 (20 overs)','108 (18.1 overs)',NULL,'KKR','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'DD','SRH','187/5 (20 overs)','191/1 (18.5 overs)',NULL,'DD','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'CSK','RR','176/4 (20 overs)','177/6 (19.5 overs)',NULL,'RR','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'KKR','KXIP','245/6 (20 overs)','214/8 (20 overs)',NULL,'KXIP','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'DD','RCB','181/4 (20 overs)','187/5 (19 overs)',NULL,'DD','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'SRH','CSK','179/4 (20 overs)','180/2 (19 overs)',NULL,'CSK','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'MI','RR','168/6 (20 overs)','171/3 (18 overs)',NULL,'MI','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'KXIP','RCB','88 (15.1 overs)','92/0 (8.1 overs)',NULL,'KXIP','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'RR','KKR','142 (19 overs)','145/4 (18 overs)',NULL,'KKR','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'MI','KXIP','186/8 (20 overs)','183/5 (20 overs)',NULL,'MI','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'RCB','SRH','218/6 (20 overs)','204/3 (20 overs)',NULL,'RCB','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'DD','CSK','162/5 (20 overs)','128/6 (20 overs)',NULL,'DD','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'RR','RCB','164/5 (20 overs)','134 (19.2 overs)',NULL,'RR','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'SRH','KKR','172/9 (20 overs)','173/5 (19.4 overs)',NULL,'SRH','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'DD','MI','174/4 (20 overs)','163 (19.3 overs)',NULL,'DD','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'KXIP','CSK','153 (19.4 overs)','159/5 (19.1 overs)',NULL,'CSK','League');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'SRH','CSK','139/7 (20 overs)','140/8 (19.1 overs)',NULL,'SRH','Qualifier1');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'KKR','RR','169/7 (20 overs)','144/4 (20 overs)',NULL,'KKR','Qualifier1');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'SRH','KKR','174/7 (20 overs)','160/9 (20 overs)',NULL,'SRH','Qualifier2');
+INSERT INTO table_matches VALUES(matches_sequence1.nextval,'CSK','SRH','181/2 (18.3 overs)','178/6 (20 overs)',NULL,'CSK','Final');
+/
+
+BEGIN
+   proc_matchresult();
+END;
+/
+
+create or replace function matchsummary_f(team1 varchar, team2 varchar)
+return varchar
+AS
+CURSOR c IS SELECT * FROM table_matches ;
+l_winner varchar2(50);
+begin
+    if team1 = team2 then
+        return null;
+    end if;
+
+    for i in c loop
+        if i.match_type='League' then
+            if team1 = i.home_team and (team2 = i.team1 or team2=i.team2)then
+                EXECUTE IMMEDIATE 'SELECT id FROM table_teams WHERE team_name='''||REGEXP_SUBSTR(i.match_result, '(.*?)( won|$)',1,1, NULL, 1)||'''' INTO l_winner;
+                return l_winner;
+            end if;
+        else
+            return NULL;
+        end if;
+    end loop;
+    return 'hello';
+
+end matchsummary_f;
+/
+
+create or replace view match_summary as
+    with abc as (
+    select * from table_teams order by team_name
+    )
+    select abc.team_name "Match summary", matchsummary_f(abc.id, 'CSK') "CSK", matchsummary_f(abc.id, 'DD') "DD", matchsummary_f(abc.id, 'KXIP') "KXIP",
+    matchsummary_f(abc.id, 'KKR') "KKR",
+    matchsummary_f(abc.id, 'MI') "MI",
+    matchsummary_f(abc.id, 'RR') "RR", matchsummary_f(abc.id, 'RCB') "RCB", matchsummary_f(abc.id, 'SRH') "SRH"
+
+    from abc order by abc.team_name
+/
+
+CREATE OR REPLACE PACKAGE teams AS
+    TYPE assoc_array_type IS TABLE OF VARCHAR2(100) INDEX BY VARCHAR2(100);
+    g_const_array assoc_array_type;
+END teams;
+/
+
+CREATE OR REPLACE PACKAGE BODY teams IS
+BEGIN
+   g_const_array('Chennai Super Kings') := 0;
+   g_const_array('Delhi Daredevils') := 0;
+   g_const_array('Kings XI Punjab') := 0;
+   g_const_array('Kolkata Knight Riders') := 0;
+   g_const_array('Mumbai Indians') := 0;
+   g_const_array('Rajasthan Royals') := 0;
+   g_const_array('Royal Challengers Bangalore') := 0;
+   g_const_array('Sunrisers Hyderabad') := 0;
+   g_const_array('CSK') := 0;
+   g_const_array('DD') := 0;
+   g_const_array('KXIP') := 0;
+   g_const_array('KKR') := 0;
+   g_const_array('MI') := 0;
+   g_const_array('RR') := 0;
+   g_const_array('RCB') := 0;
+   g_const_array('SRH') := 0;
+END teams;
+/
+
+create or replace function linearprogression_f(fv_team VARCHAR, flag int)
+return varchar
+AS
+CURSOR c IS SELECT * FROM table_matches where id>teams.g_const_array(fv_team);
+l_winner varchar2(50);
+l_teamname varchar2(50);
+BEGIN
+    IF flag=0 then
+    teams.g_const_array('Chennai Super Kings') := 0;
+    teams.g_const_array('Delhi Daredevils') := 0;
+    teams.g_const_array('Kings XI Punjab') := 0;
+    teams.g_const_array('Kolkata Knight Riders') := 0;
+    teams.g_const_array('Mumbai Indians') := 0;
+    teams.g_const_array('Rajasthan Royals') := 0;
+    teams.g_const_array('Royal Challengers Bangalore') := 0;
+    teams.g_const_array('Sunrisers Hyderabad') := 0;
+    teams.g_const_array('CSK') := 0;
+    teams.g_const_array('DD') := 0;
+    teams.g_const_array('KXIP') := 0;
+    teams.g_const_array('KKR') := 0;
+    teams.g_const_array('MI') := 0;
+    teams.g_const_array('RR') := 0;
+    teams.g_const_array('RCB') := 0;
+    teams.g_const_array('SRH') := 0;
+    END IF;
+   EXECUTE IMMEDIATE 'SELECT team_name FROM table_teams WHERE id='''||fv_team||'''' INTO l_teamname;
+    for i in c loop
+        if i.match_type = 'League' then
+            if (fv_team = i.team1) or (fv_team=i.team2)  then
+                EXECUTE IMMEDIATE 'SELECT id FROM table_teams WHERE team_name='''||REGEXP_SUBSTR(i.match_result, '(.*?)( won|$)',1,1, NULL, 1)||'''' INTO l_winner;
+                teams.g_const_array(fv_team) := i.id;
+                if fv_team = l_winner then
+                    teams.g_const_array(l_teamname):=teams.g_const_array(l_teamname)+2;
+                    return To_Char(teams.g_const_array(l_teamname));
+                else
+                    return To_Char(teams.g_const_array(l_teamname));
+                end if;
+            end if;
+        else
+            return NULL;
+        end if;
+    end loop;
+end linearprogression_f;
+/
+
+create or replace function playoff_f(fv_team varchar,fv_matchtype varchar)
+return varchar
+AS
+CURSOR c IS SELECT * FROM table_matches where match_type=fv_matchtype;
+l_winner varchar2(50);
+begin
+    for i in c loop
+        if (fv_team = i.team1) or (fv_team=i.team2)  then
+            EXECUTE IMMEDIATE 'SELECT id FROM table_teams WHERE team_name='''||REGEXP_SUBSTR(i.match_result, '(.*?)( won|$)',1,1, NULL, 1)||'''' INTO l_winner;
+            if fv_team = l_winner then
+                return 'W';
+            else
+                return 'L';
+            end if;
+        end if;
+    end loop;
+    return NULL;
+end playoff_f;
+/
+
+create or replace view linearprogression as
+    with abc as (
+    select * from table_teams order by team_name
+    )
+    select abc.team_name "League progression",
+    linearprogression_f(abc.id,0) "1",
+    linearprogression_f(abc.id,1) "2",
+    linearprogression_f(abc.id,1) "3",
+    linearprogression_f(abc.id,1) "4",
+    linearprogression_f(abc.id,1) "5",
+    linearprogression_f(abc.id,1) "6",
+    linearprogression_f(abc.id,1) "7",
+    linearprogression_f(abc.id,1) "8",
+    linearprogression_f(abc.id,1) "9",
+    linearprogression_f(abc.id,1) "10",
+    linearprogression_f(abc.id,1) "11",
+    linearprogression_f(abc.id,1) "12",
+    linearprogression_f(abc.id,1) "13",
+    linearprogression_f(abc.id,1) "14",
+    playoff_f(abc.id,'Qualifier1') "Q1",
+    playoff_f(abc.id,'Qualifier2') "Q2",
+    playoff_f(abc.id,'Final') "F"
+    from abc order by abc.team_name
+/
+
+create or replace function pts_f(fv_team varchar,fv_flag NUMBER, flag int)
+return varchar
+AS
+CURSOR c IS SELECT * FROM table_matches;
+l_winner varchar2(50);
+l_won number;
+l_loss number;
+l_teamname varchar2(50);
+BEGIN
+    IF flag=0 then
+      teams.g_const_array('Chennai Super Kings') := 0;
+      teams.g_const_array('Delhi Daredevils') := 0;
+      teams.g_const_array('Kings XI Punjab') := 0;
+      teams.g_const_array('Kolkata Knight Riders') := 0;
+      teams.g_const_array('Mumbai Indians') := 0;
+      teams.g_const_array('Rajasthan Royals') := 0;
+      teams.g_const_array('Royal Challengers Bangalore') := 0;
+      teams.g_const_array('Sunrisers Hyderabad') := 0;
+      teams.g_const_array('CSK') := 0;
+      teams.g_const_array('DD') := 0;
+      teams.g_const_array('KXIP') := 0;
+      teams.g_const_array('KKR') := 0;
+      teams.g_const_array('MI') := 0;
+      teams.g_const_array('RR') := 0;
+      teams.g_const_array('RCB') := 0;
+      teams.g_const_array('SRH') := 0;
+    END IF;
+
+    l_won:=0;
+    l_loss:=0;
+    EXECUTE IMMEDIATE 'SELECT team_name FROM table_teams WHERE id='''||fv_team||'''' INTO l_teamname;
+    IF fv_flag = 1 THEN
+        for i in c loop
+            if i.match_type = 'League' then
+                if (fv_team = i.team1) or (fv_team=i.team2)  then
+                    EXECUTE IMMEDIATE 'SELECT id FROM table_teams WHERE team_name='''||REGEXP_SUBSTR(i.match_result, '(.*?)( won|$)',1,1, NULL, 1)||'''' INTO l_winner;
+                    if fv_team = l_winner then
+                        l_won:=l_won+1;
+                    end if;
+                end if;
+            end if;
+        end loop;
+        return To_Char(l_won);
+    ELSIF fv_flag = 2 THEN
+        for i in c loop
+            if i.match_type='League' then
+                if (fv_team = i.team1) or (fv_team=i.team2)  then
+                    EXECUTE IMMEDIATE 'SELECT id FROM table_teams WHERE team_name='''||REGEXP_SUBSTR(i.match_result, '(.*?)( won|$)',1,1, NULL, 1)||'''' INTO l_winner;
+                    if fv_team != l_winner then
+                        l_loss:=l_loss+1;
+                    end if;
+                end if;
+            end if;
+        end loop;
+        return To_Char(l_loss);
+    ELSE
+        for i in c loop
+            if i.match_type='League' then
+                if (fv_team = i.team1) or (fv_team=i.team2)  then
+                    EXECUTE IMMEDIATE 'SELECT id FROM table_teams WHERE team_name='''||REGEXP_SUBSTR(i.match_result, '(.*?)( won|$)',1,1, NULL, 1)||'''' INTO l_winner;
+                    if fv_team = l_winner then
+                        teams.g_const_array(l_teamname):=teams.g_const_array(l_teamname)+2;
+                    end if;
+                end if;
+            end if;
+        end loop;
+        return To_Char(teams.g_const_array(l_teamname));
+    END IF;
+end pts_f;
+/
+
+create or replace function NRR_f(fv_team varchar)
+return varchar
+AS
+CURSOR c IS SELECT * FROM table_matches;
+ l_temp varchar2(100);
+ l_run1 NUMBER(20);
+ l_run2 NUMBER(20);
+ l_balls1 NUMBER(20);
+ l_balls2 NUMBER(20);
+ l_RR1 float;
+ l_RR2 float;
+begin
+    l_run1:=0;
+    l_run2:=0;
+    l_balls1:=0;
+    l_balls2:=0;
+
+    for i in c loop
+        if i.match_type='League' then
+            IF i.id=12 THEN
+               if (fv_team = i.team1) then
+                l_run1 := l_run1+71;
+                l_balls1 := l_balls1+36;
+                l_run2 := l_run2+60;
+                l_balls2 := l_balls2+36;
+               elsif (fv_team = i.team2) then
+                l_run1 := l_run1+60;
+                l_balls1 := l_balls1+36;
+                l_run2 := l_run2+71;
+                l_balls2 := l_balls2+36;
+               end if;
+            ELSIF i.id=36 THEN
+               if (fv_team = i.team1) then
+                l_run1 := l_run1+124;
+                l_balls1 := l_balls1+(13*6);
+                l_run2 := l_run2+126;
+                l_balls2 := l_balls2+67;
+               elsif (fv_team = i.team2) then
+                l_run1 := l_run1+126;
+                l_balls1 := l_balls1+67;
+                l_run2 := l_run2+124;
+                l_balls2 := l_balls2+(13*6);
+               end if;
+            ELSIF i.id=64 THEN
+               if (fv_team = i.team1) then
+                l_run1 := l_run1+151;
+                l_balls1 := l_balls1+(12*6);
+                l_run2 := l_run2+146;
+                l_balls2 := l_balls2+(12*6);
+               elsif (fv_team = i.team2) then
+                l_run1 := l_run1+146;
+                l_balls1 := l_balls1+(12*6);
+                l_run2 := l_run2+151;
+                l_balls2 := l_balls2+(12*6);
+               end if;
+            ELSE
+                if (fv_team = i.team1) then
+                    IF INSTR(i.score1,'/') = 0 THEN
+                        l_balls1 := l_balls1 + 120;
+                    ELSE
+                      l_temp := REGEXP_SUBSTR(i.score1,'[^( ]+',1,2);
+                      IF INSTR(l_temp, '.') = 0 THEN
+                        l_balls1 := l_balls1+TO_NUMBER(l_temp)*6;
+                      ELSE
+                        l_balls1 := l_balls1+((TO_NUMBER(REGEXP_SUBSTR(l_temp,'[^.]+',1,1)))*6) + TO_NUMBER(REGEXP_SUBSTR(l_temp,'[^.]+',1,2));
+                      END IF;
+                    END IF;
+                    l_run1 := l_run1+TO_NUMBER(REGEXP_SUBSTR(i.score1,'[^/ ]+',1,1));
+
+                    IF INSTR(i.score2,'/') = 0 THEN
+                        l_balls2 := l_balls2 + 120;
+                    ELSE
+                      l_temp := REGEXP_SUBSTR(i.score2,'[^( ]+',1,2);
+                      IF INSTR(l_temp, '.')=0 THEN
+                        l_balls2 := l_balls2+TO_NUMBER(l_temp)*6;
+                      ELSE
+                        l_balls2 := l_balls2+((TO_NUMBER(REGEXP_SUBSTR(l_temp,'[^.]+',1,1)))*6) + TO_NUMBER(REGEXP_SUBSTR(l_temp,'[^.]+',1,2));
+                      END IF;
+                    END IF;
+                    l_run2 := l_run2+ TO_NUMBER(REGEXP_SUBSTR(i.score2,'[^/ ]+',1,1));
+
+                elsif (fv_team=i.team2) then
+                    IF INSTR(i.score1,'/') = 0 THEN
+                        l_balls2 := l_balls2 + 120;
+                    ELSE
+                      l_temp := REGEXP_SUBSTR(i.score1,'[^( ]+',1,2);
+                      IF INSTR(l_temp, '.') = 0 THEN
+                        l_balls2 := l_balls2+TO_NUMBER(l_temp)*6;
+                      ELSE
+                        l_balls2 := l_balls2+((TO_NUMBER(REGEXP_SUBSTR(l_temp,'[^.]+',1,1)))*6) + TO_NUMBER(REGEXP_SUBSTR(l_temp,'[^.]+',1,2));
+                      END IF;
+                    END IF;
+                    l_run2 := l_run2+TO_NUMBER(REGEXP_SUBSTR(i.score1,'[^/ ]+',1,1));
+
+                    IF INSTR(i.score2,'/') = 0 THEN
+                        l_balls1 := l_balls1 + 120;
+                    ELSE
+                      l_temp := REGEXP_SUBSTR(i.score2,'[^( ]+',1,2);
+                      IF INSTR(l_temp, '.')=0 THEN
+                        l_balls1 := l_balls1+TO_NUMBER(l_temp)*6;
+                      ELSE
+                        l_balls1 := l_balls1+((TO_NUMBER(REGEXP_SUBSTR(l_temp,'[^.]+',1,1)))*6) + TO_NUMBER(REGEXP_SUBSTR(l_temp,'[^.]+',1,2));
+                      END IF;
+                    END IF;
+                    l_run1 := l_run1+TO_NUMBER(REGEXP_SUBSTR(i.score2,'[^/ ]+',1,1));
+                end if;
+            END IF;
+        end if;
+    end loop;
+   l_RR1 := l_run1/(l_balls1/6);
+   l_RR2 := l_run2/(l_balls2/6);
+   return To_Char(round(l_RR1-l_RR2,3));
+end NRR_f;
+/
+
+create or replace view league as
+    with abc as (
+    select * from table_teams order by team_name
+    )
+    select abc.team_name "League Table",
+    '14' "Pld",
+    pts_f(abc.id,1,0) "W",
+    pts_f(abc.id,2,0) "L",
+    '0' "T",
+    '0' "NR",
+    pts_f(abc.id,3,0) "Pts",
+    NRR_f(abc.id) "NRR"
+    from abc order by "Pts" DESC, NRR DESC
+/
+
+
+create or replace view mid_view as
+with abc1 as
+(
+SELECT t.id,t.match_type, t1.team_name team1, t2.team_name team2,t.score1,t.score2 FROM table_matches t 
+JOIN table_teams t1 ON t.team1 = t1.id 
+JOIN table_teams t2 ON t.team2 = t2.id
+where t.match_type='Qualifier1' or t.match_type='Final' 
+),
+abc2 as
+(
+SELECT l.*,NULL FROM linearprogression l
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT 'Match summary','CSK' , 'DD', 'KXIP', 'KKR', 'MI', 'RR', 'RCB', 'SRH', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT m.*,NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM match_summary m
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT 'League table', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT 'Team','Pld', 'W', 'L', 'T', 'NR', 'Pts', 'NRR', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT l.*, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM league l
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT 'Qualifier-1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT team1, score1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM abc1
+    where match_type='Qualifier1' and rownum=1
+UNION ALL
+SELECT team2, score2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM abc1
+    where match_type='Qualifier1' and rownum=1
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, 'Q2', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, team1,score1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM table_matches 
+    where match_type='Qualifier2'
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, team2,score2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM table_matches 
+    where match_type='Qualifier2'
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT 'Eliminator', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT team1, score1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM 
+    (SELECT rownum as row_num,t.* from abc1 t where match_type='Qualifier1')
+    WHERE row_num=2 
+UNION ALL 
+SELECT team2, score2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM  
+    (SELECT rownum as row_num,t.* from abc1 t where match_type='Qualifier1')
+    WHERE row_num=2 
+UNION ALL 
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT team1, score1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM abc1
+    WHERE match_type='Final'
+UNION ALL
+SELECT team2, score2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM abc1
+    WHERE match_type='Final'
+)
+select * from abc2;
+
+
+SELECT * FROM table_matches
+SELECT * FROM linearprogression
+SELECT * FROM match_summary
+SELECT * FROM league
+
+----------------------------Mid View----------------------------
+create or replace view mid_view as
+with abc1 as
+(
+SELECT t.id,t.match_type, t1.team_name team1, t2.team_name team2,t.score1,t.score2 FROM table_matches t
+JOIN table_teams t1 ON t.team1 = t1.id
+JOIN table_teams t2 ON t.team2 = t2.id
+where t.match_type='Qualifier1' or t.match_type='Final'
+),
+abc2 as
+(
+SELECT l.*,NULL N5 FROM linearprogression l
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT 'Match summary','CSK' , 'DD', 'KXIP', 'KKR', 'MI', 'RR', 'RCB', 'SRH', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT m.*,NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM match_summary m
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT 'League table', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT 'Team','Pld', 'W', 'L', 'T', 'NR', 'Pts', 'NRR', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT l.*, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM league l
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT 'Qualifier-1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT team1, score1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM abc1
+    where match_type='Qualifier1' and rownum=1
+UNION ALL
+SELECT team2, score2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM abc1
+    where match_type='Qualifier1' and rownum=1
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, 'Q2', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, team1,score1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM table_matches
+    where match_type='Qualifier2'
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, team2,score2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM table_matches
+    where match_type='Qualifier2'
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT 'Eliminator', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT team1, score1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM
+    (SELECT rownum as row_num,t.* from abc1 t where match_type='Qualifier1')
+    WHERE row_num=2
+UNION ALL
+SELECT team2, score2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM
+    (SELECT rownum as row_num,t.* from abc1 t where match_type='Qualifier1')
+    WHERE row_num=2
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM dual
+UNION ALL
+SELECT team1, score1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM abc1
+    WHERE match_type='Final'
+UNION ALL
+SELECT team2, score2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM abc1
+    WHERE match_type='Final'
+)
+select abc2.* from abc2;
+
+
+-----------------------------Left View----------------------------
+CREATE OR REPLACE VIEW lview AS
+WITH abc AS
+(
+SELECT t.id id3,t1.team_name team1,'v',t2.team_name team2,t.match_result,NULL n1,NULL n2,NULL n3 FROM table_matches t
+JOIN table_teams t1 ON t.team1 = t1.id
+JOIN table_teams t2 ON t.team2 = t2.id
+WHERE t.id<=56
+UNION
+SELECT id,score1 ,NULL,score2 ,NULL,NULL ,NULL,NULL FROM table_matches t WHERE t.id<=56
+UNION
+SELECT id ,NULL,NULL,NULL,NULL,NULL ,NULL,NULL FROM table_matches t WHERE t.id<=56
+)
+SELECT a.* FROM abc a ORDER BY id3,team1 DESC
+
+-----------------------------Right View----------------------------
+CREATE OR REPLACE VIEW rview AS
+WITH abc AS
+(
+SELECT t.id id3,t1.team_name team1,'v',t2.team_name team2,t.match_result,NULL n1,NULL n2,NULL n3 FROM table_matches t
+JOIN table_teams t1 ON t.team1 = t1.id
+JOIN table_teams t2 ON t.team2 = t2.id
+WHERE t.id>56 AND match_type='League'
+UNION
+SELECT id,score1 ,NULL,score2 ,NULL,NULL ,NULL,NULL FROM table_matches t WHERE t.id>56 AND match_type='League'
+UNION
+SELECT id ,NULL,NULL,NULL,NULL,NULL ,NULL,NULL FROM table_matches t WHERE t.id>56 AND match_type='League'
+)
+SELECT a.* FROM abc a ORDER BY id3,team1 DESC
+
+-----------------------------Final View----------------------------
+CREATE OR REPLACE VIEW final_view as
+WITH abc1 AS
+(
+SELECT s.*,m.* FROM (SELECT rownum as row_num1,a.* FROM lview a ) s
+LEFT JOIN (SELECT rownum as row_num2,a.* FROM mid_view a) m
+ON s.row_num1+1=m.row_num2
+ORDER BY s.row_num1
+)
+SELECT a.*,b.* FROM (SELECT rownum as r_num1,x.* FROM abc1 x) a
+LEFT JOIN (SELECT rownum as r_num2,y.* FROM rview y) b
+ON a.r_num1=b.r_num2
+ORDER BY a.r_num1
+
+
+
+
+
+
+
